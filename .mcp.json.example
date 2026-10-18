@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "plane": {
+      "type": "http",
+      "url": "https://mcp.plane.so/http/api-key/mcp",
+      "headers": {
+        "Authorization": "Bearer <PLANE_API_KEY>",
+        "X-Workspace-slug": "roboarm"
+      }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--browserUrl=http://127.0.0.1:29225"]
+    }
+  }
+}
