@@ -107,6 +107,25 @@ The owner's "D1" board turned out to be an **ESP8266** (esptool: "This chip is E
    - Single source of secrets: the firmware repo's `.env`. The control repo's make looks for `ARM_KEY` in its own `.env` first, then in `$(ROBOARM_APP_PATH)/.env` (its `.env` already holds `ROBOARM_APP_PATH`).
 9. **Owner's network:** `Tenda_8AA590` is a 2.4 GHz network the ESP8266 can join. Its `_5G` twin can't be used.
 
+## Schematic and protocol versioning (owner request: "don't forget schema design versioning")
+
+Interpreted as versioning the wiring schematics, tied to what the firmware reports, so the wiring on the bench can always be matched to the flashed firmware.
+
+- **Wiring version per board:** an integer `kWiringVersion` in each `config_<board>.h`.
+  - Existing ESP32 and Uno diagrams are **v1**. The new ESP8266 diagram is **v1**.
+  - Any change to pins, power or added hardware (e.g. Stage 2 PCA9685) bumps that board's number.
+- **Title block on every SVG:** `Wiring v<N> · <board> · Stage <S> · <date> · firmware config: config_<board>.h`.
+  - Old versions are kept as `docs/wiring/archive/<board>.v<N>.svg` when superseded.
+  - `docs/wiring/CHANGELOG.md` lists each version: what changed, why, and the minimum firmware version.
+- **Firmware identity:** `kFirmwareVersion "0.2.0"` (semver; this Wi-Fi release) and `kProtocolVersion 1` in core.
+  - New command `I` → `INFO RoboArm fw=0.2.0 proto=1 board=<esp32-d1r32|uno|esp8266-d1> wiring=<N>`. It works in any state and is answered like `?`.
+  - Boot prints the same `INFO` line on USB.
+- **App:** on connect it sends `I`, logs the INFO line, and shows `fw / board / wiring vN` in the status bar.
+  - If `proto` ≠ 1, it shows a warning ("firmware protocol vN not supported by this app") and keeps the controls disabled.
+  - If `I` gets `ERR bad command` (old firmware), it treats the firmware as proto 1 and wiring unknown, and logs "firmware too old to report wiring version".
+  - FakeArm answers `INFO RoboArm fw=sim proto=1 board=sim wiring=0`.
+- The rule is written into `docs/wiring/README.md`: "Before powering on, check the wiring version shown in the app matches the version in the diagram's title block."
+
 ## Decided by the owner
 
 - Use the ESP8266 D1 over home Wi-Fi (not AP mode, not HC-05/ESP32).
