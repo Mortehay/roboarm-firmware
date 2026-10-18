@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "core/Config.h"
+#include "Config.h"
 
 // Speed-limited motion toward per-joint targets. No hardware access.
 class Motion {

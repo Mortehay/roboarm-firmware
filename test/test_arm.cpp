@@ -3,8 +3,6 @@
 #include "core/Arm.h"
 #include "check.h"
 
-class Arm;
-std::string cmd(Arm& a, const char* l);
 #define CHECK_CMD(arm, line, expected) \
   do { std::string rep_ = cmd(arm, line); CHECK_STR(rep_.c_str(), expected); } while (0)
 
@@ -34,12 +32,10 @@ ArmConfig makeCfg() {
   c.defaultSpeed = 60; c.homingSpeed = 30; c.settleMs = 300;
   return c;
 }
-}
 std::string cmd(Arm& a, const char* l) {
   VecSink s; a.handleLine(l, s);
   return s.lines.empty() ? "" : s.lines.back();
 }
-namespace {
 uint32_t gNow;
 void run(Arm& a, uint32_t ms) {  // step 10 ms
   for (uint32_t t = 0; t < ms; t += 10) { gNow += 10; a.update(gNow); }
@@ -147,8 +143,7 @@ TEST(release_detaches) {
   CHECK_CMD(a, "R", "OK R");
   CHECK_EQ(o.count('d'), 5);
   CHECK(a.state() == ArmState::Detached);
-  std::string q = cmd(a, "?");
-  CHECK_EQ(q[q.size() - 4], '0');
+  CHECK_CMD(a, "?", "STATE 90 90 90 90 90 0 60");
   int w = o.count('w');
   run(a, 500);
   CHECK_EQ(o.count('w'), w);
@@ -199,4 +194,45 @@ TEST(rehome_from_armed_sequential) {
   CHECK(a.state() == ArmState::Armed);
   CHECK_CMD(a, "?", "STATE 90 90 90 90 90 1 150");
   CHECK_EQ(o.count('d'), 0);
+}
+
+TEST(stop_during_rehome_freezes_armed) {
+  ArmConfig c = makeCfg(); FakeServoOut o; Arm a(c, o);
+  arm(a);
+  cmd(a, "V 100");
+  cmd(a, "A 60 60 60 60 60");
+  run(a, 1000);
+  cmd(a, "H");
+  run(a, 500);
+  CHECK(a.state() == ArmState::Homing);
+  CHECK_CMD(a, "S", "OK S");
+  CHECK(a.state() == ArmState::Armed);
+  CHECK_EQ(o.count('d'), 0);
+  std::string p1 = cmd(a, "?");
+  run(a, 3000);
+  std::string p2 = cmd(a, "?");
+  CHECK_STR(p2.c_str(), p1.c_str());
+  CHECK_EQ(p2.substr(p2.size() - 5), std::string("1 100"));
+  CHECK_EQ(o.count('d'), 0);
+}
+TEST(release_during_homing_stable) {
+  ArmConfig c = makeCfg(); FakeServoOut o; Arm a(c, o);
+  cmd(a, "H"); a.update(0); a.update(300);
+  CHECK_CMD(a, "R", "OK R");
+  CHECK_EQ(o.count('d'), 5);
+  CHECK(a.state() == ArmState::Detached);
+  std::string p1 = cmd(a, "?");
+  int w = o.count('w');
+  run(a, 3000);
+  CHECK_EQ(o.count('w'), w);
+  CHECK_EQ(o.count('a'), 2);
+  std::string p2 = cmd(a, "?");
+  CHECK_STR(p2.c_str(), p1.c_str());
+  CHECK_STR(p2.c_str(), "STATE 90 90 90 90 90 0 60");
+}
+TEST(round_negative_half_away) {
+  ArmConfig c = makeCfg();
+  c.joints[0].minDeg = -50; c.joints[0].maxDeg = 150; c.joints[0].homeDeg = -10;
+  FakeServoOut o; Arm a(c, o);
+  CHECK_CMD(a, "?", "STATE -10 90 90 90 90 0 60");
 }

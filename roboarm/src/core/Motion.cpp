@@ -1,4 +1,4 @@
-#include "core/Motion.h"
+#include "Motion.h"
 
 Motion::Motion() : speed_(60.0f), lastMs_(0), started_(false) {
   for (uint8_t i = 0; i < kJointCount; ++i) pos_[i] = tgt_[i] = 0.0f;

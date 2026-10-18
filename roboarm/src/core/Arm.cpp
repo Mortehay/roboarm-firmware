@@ -1,9 +1,11 @@
-#include "core/Arm.h"
+#include "Arm.h"
 #include <stdio.h>
-#include "core/Protocol.h"
+#include "Protocol.h"
 
 namespace {
-int16_t roundDeg(float x) { return static_cast<int16_t>(x + 0.5f); }
+int16_t roundDeg(float x) {
+  return static_cast<int16_t>(x >= 0.0f ? x + 0.5f : x - 0.5f);  // half away from zero
+}
 constexpr float kMinSpeed = 5.0f;
 constexpr float kMaxSpeed = 180.0f;
 }  // namespace
@@ -120,10 +122,15 @@ void Arm::handleLine(const char* line, ReplySink& reply) {
       if (state_ == ArmState::Armed) {
         motion_.holdAll();
       } else if (state_ == ArmState::Homing) {
-        detachAll(true);
-        homingFromArmed_ = false;
+        motion_.holdAll();
         motion_.setSpeed(userSpeed_);
-        state_ = ArmState::Detached;
+        if (homingFromArmed_) {
+          // all joints attached: freeze in place, never go limp
+          finishHoming();
+        } else {
+          detachAll(true);
+          state_ = ArmState::Detached;
+        }
       }
       reply.line("OK S");
       break;

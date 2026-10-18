@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "core/Config.h"
-#include "core/Motion.h"
+#include "Config.h"
+#include "Motion.h"
 
 class ServoOut {
  public:
