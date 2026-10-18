@@ -65,22 +65,46 @@ static ClientSession session;
 static bool wifiWasUp = false;
 static bool mdnsStarted = false;
 
+static uint32_t lastWifiBeginMs = 0;
+// "K " + key must fit in one LineReader line.
+static_assert(sizeof(ROBOARM_ARM_KEY) - 1 + 2 <= LineReader::kMaxLen,
+              "ARM_KEY too long for LineReader");
+
 static void dropClient() {
-  client.stop();
+  client.stop(1);  // stop(0) would wait up to 300 ms for ACKs; never block
   clientReader = LineReader();
 }
 
 static void netStart() {
-  WiFi.mode(WIFI_STA);
   WiFi.persistent(false);
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);  // keep UDP/mDNS replies reliable
   WiFi.setAutoReconnect(true);
   WiFi.begin(ROBOARM_WIFI_SSID, ROBOARM_WIFI_PASSWORD);
+  lastWifiBeginMs = millis();
   tcpServer.begin();
   tcpServer.setNoDelay(true);
 }
 
+static void handleClientLine(const char* line, uint32_t now) {
+  switch (session.onLine(line, ROBOARM_ARM_KEY, now)) {
+    case ClientSession::Action::Forward:
+      arm.handleLine(line, clientReply);
+      break;
+    case ClientSession::Action::ReplyReadyAndAuth:
+      clientReply.line("READY RoboArm");
+      break;
+    case ClientSession::Action::ReplyBadKeyThenClose:
+      clientReply.line("ERR bad key");
+      break;
+    default:
+      break;
+  }
+}
+
 static void netPump(uint32_t now) {
-  bool up = WiFi.status() == WL_CONNECTED;
+  wl_status_t st = WiFi.status();
+  bool up = st == WL_CONNECTED;
   if (up && !wifiWasUp) {
     Serial.print("WIFI ");
     Serial.print(WiFi.localIP());
@@ -94,9 +118,16 @@ static void netPump(uint32_t now) {
   wifiWasUp = up;
   if (mdnsStarted) MDNS.update();
   if (!up) {
-    if (client) {
+    if (session.active() || client) {
       dropClient();
       session.onDisconnect();
+    }
+    // Auto-reconnect gives up on some failures; retry without blocking.
+    if (now - lastWifiBeginMs >= 15000 &&
+        (st == WL_WRONG_PASSWORD || st == WL_CONNECT_FAILED ||
+         st == WL_NO_SSID_AVAIL)) {
+      WiFi.begin(ROBOARM_WIFI_SSID, ROBOARM_WIFI_PASSWORD);
+      lastWifiBeginMs = now;
     }
     return;
   }
@@ -117,25 +148,27 @@ static void netPump(uint32_t now) {
     }
   }
 
+  // Drop a dead or expired client first so a quick reconnect is not "busy".
+  if (session.active()) {
+    if (!client.connected() && client.available() <= 0) {
+      dropClient();
+      session.onDisconnect();
+    } else if (session.poll(now) == ClientSession::Action::Close) {
+      dropClient();
+    }
+  }
+
   // New TCP connections.
   WiFiClient incoming = tcpServer.accept();
   if (incoming) {
     if (session.accept(now)) {
-      client.stop();
       client = incoming;
       client.setNoDelay(true);
       clientReader = LineReader();
     } else {
       incoming.print("ERR busy\n");
-      incoming.stop();
+      incoming.stop(1);
     }
-  }
-
-  if (!session.active()) return;
-  if (!client.connected() && client.available() <= 0) {
-    dropClient();
-    session.onDisconnect();
-    return;
   }
 
   while (session.active() && client.available() > 0) {
@@ -143,26 +176,16 @@ static void netPump(uint32_t now) {
     if (c < 0) break;
     LineReader::Result r = clientReader.feed(static_cast<char>(c));
     if (r == LineReader::kOverflow) {
-      clientReply.line("ERR line too long");
+      // Before auth an overlong line is a bad key; after auth it is just long.
+      if (session.onLine("!", ROBOARM_ARM_KEY, now) ==
+          ClientSession::Action::Forward)
+        clientReply.line("ERR line too long");
+      else
+        clientReply.line("ERR bad key");
     } else if (r == LineReader::kLine) {
-      const char* line = clientReader.line();
-      switch (session.onLine(line, ROBOARM_ARM_KEY, now)) {
-        case ClientSession::Action::Forward:
-          arm.handleLine(line, clientReply);
-          break;
-        case ClientSession::Action::ReplyReadyAndAuth:
-          clientReply.line("READY RoboArm");
-          break;
-        case ClientSession::Action::ReplyBadKeyThenClose:
-          clientReply.line("ERR bad key");
-          break;
-        default:
-          break;
-      }
+      handleClientLine(clientReader.line(), now);
     }
   }
-
-  if (session.poll(now) == ClientSession::Action::Close) dropClient();
 }
 #endif
 

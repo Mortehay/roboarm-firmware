@@ -45,8 +45,8 @@ def validate(env):
         errs.append("WIFI_PASSWORD must be 8-63 printable ASCII characters")
     if not key:
         errs.append("ARM_KEY is missing or empty")
-    elif not re.fullmatch(r"[A-Za-z0-9_-]{8,64}", key):
-        errs.append("ARM_KEY must match [A-Za-z0-9_-]{8,64}")
+    elif not re.fullmatch(r"[A-Za-z0-9_-]{8,40}", key):
+        errs.append("ARM_KEY must match [A-Za-z0-9_-]{8,40}")
     return errs
 
 

@@ -101,7 +101,7 @@ The owner's "D1" board turned out to be an **ESP8266** (esptool: "This chip is E
 6. **ESP8266 core:** no core is installed locally. Pin the latest stable `esp8266:esp8266` 3.1.x (the builder records the exact version) in the setup script and Dockerfile.
 7. **Missing key in the app:** if `ARM_KEY` is empty or unset, `TcpLink` refuses to connect with "ARM_KEY not set (add it to .env)".
 8. **Secret formats and parsing:**
-   - `ARM_KEY` must match `[A-Za-z0-9_-]{8,64}`. `WIFI_SSID` is 1–32 bytes and `WIFI_PASSWORD` 8–63 bytes, any printable characters.
+   - `ARM_KEY` must match `[A-Za-z0-9_-]{8,40}`. `WIFI_SSID` is 1–32 bytes and `WIFI_PASSWORD` 8–63 bytes, any printable characters.
    - A small generator script parses `.env` itself (`KEY=value` lines; optional surrounding quotes stripped; no shell expansion) rather than `include .env` in make. It validates the values and writes the C header with escaping.
    - The app's make targets read `ARM_KEY` via the same parser and pass it as `-e ARM_KEY=…` to Docker. No `--env-file`.
    - Single source of secrets: the firmware repo's `.env`. The control repo's make looks for `ARM_KEY` in its own `.env` first, then in `$(ROBOARM_APP_PATH)/.env` (its `.env` already holds `ROBOARM_APP_PATH`).

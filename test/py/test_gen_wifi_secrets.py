@@ -25,6 +25,12 @@ GOOD = "WIFI_SSID=Net\nWIFI_PASSWORD=password1\nARM_KEY=abcdefgh\n"
 
 
 class ParseEnv(unittest.TestCase):
+    def test_arm_key_length_limits(self):
+        base = {"WIFI_SSID": "a", "WIFI_PASSWORD": "password1"}
+        self.assertEqual(g.validate({**base, "ARM_KEY": "k" * 40}), [])
+        errs = g.validate({**base, "ARM_KEY": "k" * 41})
+        self.assertTrue(any("ARM_KEY" in e for e in errs))
+
     def test_parse(self):
         self.assertEqual(
             g.parse_env('A=1\r\n# c\n\nB="x y"\nC=\'q\'\n'),
