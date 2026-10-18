@@ -14,8 +14,17 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates make g++ python3 \
  && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh \
-    | BINDIR=/usr/local/bin sh -s ${ARDUINO_CLI_VERSION}
+# arduino-cli from the pinned GitHub release, verified against the release's checksums file.
+RUN set -eux; \
+    base="https://github.com/arduino/arduino-cli/releases/download/v${ARDUINO_CLI_VERSION}"; \
+    tgz="arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz"; \
+    cd /tmp; \
+    curl -fsSLO "$base/$tgz"; \
+    curl -fsSL "$base/${ARDUINO_CLI_VERSION}-checksums.txt" -o checksums.txt; \
+    grep " $tgz\$" checksums.txt | sha256sum -c -; \
+    mkdir cli && tar -xzf "$tgz" -C cli; \
+    install -m 0755 cli/arduino-cli /usr/local/bin/arduino-cli; \
+    rm -rf /tmp/cli "$tgz" checksums.txt
 
 RUN mkdir -p "$ARDUINO_DIRECTORIES_DATA" "$ARDUINO_DIRECTORIES_USER" \
  && arduino-cli core update-index --additional-urls "$ESP32_URL,$ESP8266_URL" \

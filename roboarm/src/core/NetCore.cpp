@@ -68,8 +68,9 @@ ClientSession::Action ClientSession::onLine(const char* line, const char* key,
 ClientSession::Action ClientSession::poll(uint32_t nowMs) {
   if (state_ == State::Free) return Action::None;
   uint32_t elapsed = nowMs - stamp_;
-  uint32_t limit =
-      state_ == State::BadKey ? kBadKeyCloseDelayMs : kIdleTimeoutMs;
+  uint32_t limit = kIdleTimeoutMs;
+  if (state_ == State::BadKey) limit = kBadKeyCloseDelayMs;
+  else if (state_ == State::Unauthed) limit = kAuthTimeoutMs;
   if (elapsed >= limit) {
     reset();
     return Action::Close;

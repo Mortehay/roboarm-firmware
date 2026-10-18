@@ -14,8 +14,10 @@ CORE_SRCS  := $(wildcard roboarm/src/core/*.cpp)
 
 .PHONY: test build-esp32 build-uno build-esp8266 flash-esp32 flash-uno flash-esp8266 monitor image
 
+DF_HASH := $(shell sha256sum Dockerfile | cut -d' ' -f1)
+
 image:
-	docker build -t $(IMAGE) .
+	docker build --label roboarm.dockerfile=$(DF_HASH) -t $(IMAGE) .
 
 ifeq ($(LOCAL),1)
 
@@ -49,25 +51,28 @@ monitor:
 
 else
 
-# Build the image if it is missing.
+# Build the image if it is missing or was built from a different Dockerfile.
 ensure-image:
-	@docker image inspect $(IMAGE) >/dev/null 2>&1 || $(MAKE) --no-print-directory image
+	@[ "$$(docker image inspect -f '{{index .Config.Labels "roboarm.dockerfile"}}' $(IMAGE) 2>/dev/null)" = "$(DF_HASH)" ] || $(MAKE) --no-print-directory image
 
 # -it only when stdin is a terminal (monitor needs it; CI must not have it).
-DOCKER_RUN = docker run --rm $$([ -t 0 ] && echo -it) \
+DOCKER_RUN = docker run --rm --init $$([ -t 0 ] && echo -it) \
 	--user $$(id -u):$$(id -g) -e HOME=/tmp \
 	-v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)"
 # Fail early with a clear message when the serial port is absent.
 CHECK_PORT = test -e "$(PORT)" || { echo "error: serial port $(PORT) not found. Plug in the board and pass PORT=/dev/ttyXXX (see docs/flashing.md)." >&2; exit 1; }
 DEVICE_ARGS = --device "$(PORT)" --group-add $$(stat -c %g "$(PORT)")
 
-.PHONY: ensure-image
+.PHONY: ensure-image check-port
+
+check-port:
+	@$(CHECK_PORT)
 
 test build-esp32 build-uno build-esp8266: ensure-image
 	$(DOCKER_RUN) $(IMAGE) make $@ LOCAL=1
 
-flash-esp32 flash-uno flash-esp8266 monitor: ensure-image
-	@$(CHECK_PORT)
+# Port check first, so a missing device does not trigger an image build.
+flash-esp32 flash-uno flash-esp8266 monitor: check-port ensure-image
 	$(DOCKER_RUN) $(DEVICE_ARGS) $(IMAGE) make $@ LOCAL=1 PORT=$(PORT)
 
 endif

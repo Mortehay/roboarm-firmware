@@ -4,7 +4,8 @@
 
 constexpr uint16_t kTcpPort = 3333;
 constexpr uint16_t kUdpPort = 3334;
-constexpr uint32_t kIdleTimeoutMs = 10000;
+constexpr uint32_t kIdleTimeoutMs = 10000;  // after auth
+constexpr uint32_t kAuthTimeoutMs = 3000;   // connected client must send its key within this
 constexpr uint32_t kBadKeyCloseDelayMs = 1000;
 
 // True iff line is exactly "K " + key. The comparison loop always covers the
@@ -35,7 +36,7 @@ class ClientSession {
   bool accept(uint32_t nowMs);
   // Before auth: key check. After auth: Forward. Every line refreshes idle.
   Action onLine(const char* line, const char* key, uint32_t nowMs);
-  // Close when idle >= kIdleTimeoutMs (also before auth) or, after a bad key,
+  // Close when idle >= kAuthTimeoutMs before auth, >= kIdleTimeoutMs after auth, or, after a bad key,
   // when kBadKeyCloseDelayMs elapsed. Close also resets the session.
   Action poll(uint32_t nowMs);
   void onDisconnect() { reset(); }

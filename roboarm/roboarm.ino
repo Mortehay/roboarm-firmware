@@ -59,7 +59,22 @@ static LineReader btReader;
 static WiFiServer tcpServer(kTcpPort);
 static WiFiUDP udp;
 static WiFiClient client;
-static StreamReply clientReply(client);
+// A client that stopped reading must not stall loop(): drop a reply that does not fit the
+// send buffer instead of waiting for space (setTimeout(20) below bounds any residual wait).
+class ClientReply : public ReplySink {
+ public:
+  explicit ClientReply(WiFiClient& c) : c_(c) {}
+  void line(const char* text) override {
+    size_t n = strlen(text) + 1;
+    if (!c_.connected() || c_.availableForWrite() < static_cast<int>(n)) return;
+    c_.print(text);
+    c_.print('\n');
+  }
+
+ private:
+  WiFiClient& c_;
+};
+static ClientReply clientReply(client);
 static LineReader clientReader;
 static ClientSession session;
 static bool wifiWasUp = false;
@@ -164,8 +179,10 @@ static void netPump(uint32_t now) {
     if (session.accept(now)) {
       client = incoming;
       client.setNoDelay(true);
+      client.setTimeout(20);  // ms; bounds any blocking write to a client that stopped reading
       clientReader = LineReader();
     } else {
+      incoming.setTimeout(20);
       incoming.print("ERR busy\n");
       incoming.stop(1);
     }

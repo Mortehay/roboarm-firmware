@@ -13,8 +13,8 @@ fi
 
 arduino-cli version
 arduino-cli core update-index --additional-urls "$URL"
-arduino-cli core install esp32:esp32 arduino:avr esp8266:esp8266@3.1.2 --additional-urls "$URL"
-arduino-cli lib install ESP32Servo Servo
+arduino-cli core install esp32:esp32@3.3.12 arduino:avr@1.8.8 esp8266:esp8266@3.1.2 --additional-urls "$URL"
+arduino-cli lib install ESP32Servo@3.1.3 Servo@1.3.0
 
 echo "--- cores ---"
 arduino-cli core list

@@ -51,7 +51,7 @@ The owner's "D1" board turned out to be an **ESP8266** (esptool: "This chip is E
   - `make` generates `roboarm/src/boards/wifi_secrets.h` from `.env` before an ESP8266 build. The file is gitignored, and a committed `wifi_secrets.h.example` serves Arduino IDE users.
   - The build fails with a clear message if any key is missing.
   - Values are escaped for C string literals. Secrets are never echoed by make.
-- `make build-esp8266`, `make flash-esp8266 PORT=/dev/ttyUSB0`, `make monitor` (unchanged). The Docker image adds the `esp8266:esp8266` core (pinned version) via `https://arduino.esp8266.com/stable/package_esp8266com_index.json`. Secrets are passed into the container only through the bind-mounted generated header, never as image layers or build args.
+- `make build-esp8266`, `make flash-esp8266 PORT=/dev/ttyUSB0`, `make monitor` (unchanged). The Docker image adds the `esp8266:esp8266` core (pinned version) via `https://arduino.esp8266.com/stable/package_esp8266com_index.json`. The header generator runs inside the container on the bind-mounted repo, so `.env` is visible to the build container at runtime, but it is never baked into image layers or passed as build args.
 - Native tests (`make test`) still cover the core. Any new pure logic (e.g. key check, UDP reply formatting) goes in Arduino-free code with tests.
 
 ## Control app

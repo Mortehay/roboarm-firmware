@@ -60,12 +60,27 @@ TEST(net_good_key_and_idle) {
   CHECK(s.poll(5000 + 10000) == A::Close);
   CHECK(!s.active());
 }
-TEST(net_idle_before_auth) {
+TEST(net_auth_timeout_before_key) {
   ClientSession s;
   s.accept(1000);
-  CHECK(s.poll(1000 + 9999) == A::None);
-  CHECK(s.poll(1000 + 10000) == A::Close);
+  CHECK(s.poll(1000 + kAuthTimeoutMs - 1) == A::None);
+  CHECK(s.poll(1000 + kAuthTimeoutMs) == A::Close);
   CHECK(!s.active());
+  CHECK(kAuthTimeoutMs == 3000);
+}
+TEST(net_auth_timeout_millis_wrap) {
+  ClientSession s;
+  s.accept(0xFFFFF800u);
+  CHECK(s.poll(0xFFFFF800u + kAuthTimeoutMs - 1) == A::None);  // wraps past 0
+  CHECK(s.poll(0xFFFFF800u + kAuthTimeoutMs) == A::Close);
+}
+TEST(net_idle_limit_after_auth_is_10s) {
+  ClientSession s;
+  s.accept(0);
+  CHECK(s.onLine("K k1234567", "k1234567", 100) == A::ReplyReadyAndAuth);
+  CHECK(s.poll(100 + kAuthTimeoutMs) == A::None);  // 3 s limit no longer applies
+  CHECK(s.poll(100 + kIdleTimeoutMs - 1) == A::None);
+  CHECK(s.poll(100 + kIdleTimeoutMs) == A::Close);
 }
 TEST(net_disconnect_frees) {
   ClientSession s;
