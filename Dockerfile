@@ -23,4 +23,8 @@ RUN mkdir -p "$ARDUINO_DIRECTORIES_DATA" "$ARDUINO_DIRECTORIES_USER" \
  && rm -rf "$ARDUINO_DIRECTORIES_DOWNLOADS" \
  && chmod -R a+rX /opt/arduino
 
+# The ESP8266 core's build script writes CommonHFile.h into its own core dir;
+# builds run as a non-root user, so that directory must be world-writable.
+RUN chmod a+w "$ARDUINO_DIRECTORIES_DATA/packages/esp8266/hardware/esp8266/3.1.2/cores/esp8266"
+
 WORKDIR /work

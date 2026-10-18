@@ -12,6 +12,8 @@ TEST(net_key_match) {
   CHECK(!keyLineMatches("Kabcdefgh", "abcdefgh"));
   CHECK(!keyLineMatches("", "abcdefgh"));
   CHECK(!keyLineMatches("K abcdefgX", "abcdefgh"));
+  CHECK(!keyLineMatches("K ", ""));
+  CHECK(!keyLineMatches("K", ""));
 }
 TEST(net_discovery_request) {
   CHECK(isDiscoveryRequest("ROBOARM?", 8));

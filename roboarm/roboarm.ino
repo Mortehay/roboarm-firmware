@@ -8,6 +8,14 @@
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error "Bluetooth Classic is not enabled for this ESP32 target (use classic ESP32, e.g. esp32:esp32:esp32)"
 #endif
+#elif defined(ESP8266)
+#include <Servo.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
+#include <WiFiUdp.h>
+#include "src/core/NetCore.h"
+#include "src/boards/config_esp8266.h"
+#include "src/boards/wifi_secrets.h"
 #else
 #include <Servo.h>
 #include "src/boards/config_uno.h"
@@ -47,6 +55,117 @@ static StreamReply btReply(SerialBT);
 static LineReader btReader;
 #endif
 
+#if defined(ESP8266)
+static WiFiServer tcpServer(kTcpPort);
+static WiFiUDP udp;
+static WiFiClient client;
+static StreamReply clientReply(client);
+static LineReader clientReader;
+static ClientSession session;
+static bool wifiWasUp = false;
+static bool mdnsStarted = false;
+
+static void dropClient() {
+  client.stop();
+  clientReader = LineReader();
+}
+
+static void netStart() {
+  WiFi.mode(WIFI_STA);
+  WiFi.persistent(false);
+  WiFi.setAutoReconnect(true);
+  WiFi.begin(ROBOARM_WIFI_SSID, ROBOARM_WIFI_PASSWORD);
+  tcpServer.begin();
+  tcpServer.setNoDelay(true);
+}
+
+static void netPump(uint32_t now) {
+  bool up = WiFi.status() == WL_CONNECTED;
+  if (up && !wifiWasUp) {
+    Serial.print("WIFI ");
+    Serial.print(WiFi.localIP());
+    Serial.print('\n');
+    if (mdnsStarted) MDNS.end();
+    mdnsStarted = MDNS.begin("roboarm");
+    if (mdnsStarted) MDNS.addService("roboarm", "tcp", kTcpPort);
+    udp.stop();
+    udp.begin(kUdpPort);
+  }
+  wifiWasUp = up;
+  if (mdnsStarted) MDNS.update();
+  if (!up) {
+    if (client) {
+      dropClient();
+      session.onDisconnect();
+    }
+    return;
+  }
+
+  // UDP discovery.
+  if (udp.parsePacket() > 0) {
+    char pkt[16];
+    int n = udp.read(pkt, sizeof(pkt));
+    if (n > 0 && isDiscoveryRequest(pkt, static_cast<size_t>(n))) {
+      char reply[48];
+      String ip = WiFi.localIP().toString();
+      size_t len = formatDiscoveryReply(reply, sizeof(reply), ip.c_str());
+      if (len > 0) {
+        udp.beginPacket(udp.remoteIP(), udp.remotePort());
+        udp.write(reinterpret_cast<const uint8_t*>(reply), len);
+        udp.endPacket();
+      }
+    }
+  }
+
+  // New TCP connections.
+  WiFiClient incoming = tcpServer.accept();
+  if (incoming) {
+    if (session.accept(now)) {
+      client.stop();
+      client = incoming;
+      client.setNoDelay(true);
+      clientReader = LineReader();
+    } else {
+      incoming.print("ERR busy\n");
+      incoming.stop();
+    }
+  }
+
+  if (!session.active()) return;
+  if (!client.connected() && client.available() <= 0) {
+    dropClient();
+    session.onDisconnect();
+    return;
+  }
+
+  while (session.active() && client.available() > 0) {
+    int c = client.read();
+    if (c < 0) break;
+    LineReader::Result r = clientReader.feed(static_cast<char>(c));
+    if (r == LineReader::kOverflow) {
+      clientReply.line("ERR line too long");
+    } else if (r == LineReader::kLine) {
+      const char* line = clientReader.line();
+      switch (session.onLine(line, ROBOARM_ARM_KEY, now)) {
+        case ClientSession::Action::Forward:
+          arm.handleLine(line, clientReply);
+          break;
+        case ClientSession::Action::ReplyReadyAndAuth:
+          clientReply.line("READY RoboArm");
+          break;
+        case ClientSession::Action::ReplyBadKeyThenClose:
+          clientReply.line("ERR bad key");
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  if (session.poll(now) == ClientSession::Action::Close) dropClient();
+}
+#endif
+
 static void pump(Stream& in, LineReader& reader, StreamReply& reply) {
   while (in.available() > 0) {
     int c = in.read();
@@ -64,6 +183,9 @@ void setup() {
   Serial.begin(115200);
   serialReply.line("READY RoboArm");
   arm.handleLine("I", serialReply);
+#if defined(ESP8266)
+  netStart();
+#endif
 #if defined(ESP32)
   SerialBT.begin("RoboArm");
   btReply.line("READY RoboArm");
@@ -75,6 +197,9 @@ void loop() {
   pump(Serial, serialReader, serialReply);
 #if defined(ESP32)
   pump(SerialBT, btReader, btReply);
+#endif
+#if defined(ESP8266)
+  netPump(millis());
 #endif
   arm.update(millis());
 }

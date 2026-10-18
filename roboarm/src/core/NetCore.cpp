@@ -4,6 +4,7 @@
 
 bool keyLineMatches(const char* line, const char* key) {
   size_t klen = strlen(key);
+  if (klen == 0) return false;  // an empty key never matches
   if (strlen(line) != klen + 2) return false;
   if (line[0] != 'K' || line[1] != ' ') return false;
   uint8_t diff = 0;
