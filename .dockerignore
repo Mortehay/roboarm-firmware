@@ -1,0 +1,7 @@
+.git
+build/
+.superpowers/
+.history/
+.lh/
+.env
+.mcp.json

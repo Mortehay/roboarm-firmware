@@ -2,13 +2,11 @@
 
 **Servo PSU output OFF while flashing.** The board is powered from USB alone while you upload.
 
-## 1. One-time toolchain setup
+## 1. Setup
 
-```
-scripts/setup-arduino-cli.sh
-```
+Install Docker (add your user to the `docker` group, then log out and in) and `make`. That is all. The first `make` command builds the `roboarm-firmware-tools` image (arduino-cli, ESP32 and AVR cores, libraries; several GB, takes a few minutes). `make image` builds it explicitly. Every `make` target runs inside this container; the flash and monitor targets pass the serial port through to it.
 
-It installs `arduino-cli` into `~/.local/bin` (if missing), the ESP32 and AVR cores, and the ESP32Servo and Servo libraries. It is safe to run again. The Makefile adds `~/.local/bin` to `PATH`.
+Quick path: `make test`, then `make flash-esp32 PORT=/dev/ttyUSB0`.
 
 ## 2. Find the serial port
 
@@ -48,11 +46,21 @@ make flash-uno PORT=/dev/ttyACM0
 make monitor PORT=/dev/ttyACM0
 ```
 
-`PORT` defaults to `/dev/ttyUSB0`. Run `make test` for the host unit tests before flashing.
+`PORT` defaults to `/dev/ttyUSB0`. In Docker mode the target fails immediately if the port does not exist. Run `make test` for the host unit tests before flashing.
 
 After a reset the monitor shows `READY RoboArm` (115200 baud). Servos stay limp until you send `H`. Before sending `H`, read the [pre-power checklist](wiring/README.md).
 
 Monitor commands: `M j d` (move joint j to d degrees), `A d1 d2 d3 d4 d5`, `V s` (speed deg/s), `H` (home), `S` (stop), `R` (release), `?` (status).
+
+## Without Docker (LOCAL=1)
+
+To run natively, install the toolchain once:
+
+```
+scripts/setup-arduino-cli.sh
+```
+
+It installs `arduino-cli` into `~/.local/bin` (if missing), the ESP32 and AVR cores, and the ESP32Servo and Servo libraries. It is safe to run again. The Makefile adds `~/.local/bin` to `PATH`. Then prefix any target with `LOCAL=1`, e.g. `make LOCAL=1 flash-esp32 PORT=/dev/ttyUSB0`. Native builds also need `g++` and `make`.
 
 ## Troubleshooting
 
