@@ -86,6 +86,18 @@ class Render(unittest.TestCase):
             self.assertEqual(subprocess.run([os.path.join(d, "t")]).returncode, 0)
 
 
+    def test_trigraph_c99(self):
+        pw = "ab??/cd??=ef"
+        hdr = g.render_header("a", pw, "abcdefgh")
+        with tempfile.TemporaryDirectory() as d:
+            write(os.path.join(d, "h.h"), hdr)
+            write(os.path.join(d, "t.c"),
+                  '#include <string.h>\n#include "h.h"\n'
+                  'int main(void){return strcmp(ROBOARM_WIFI_PASSWORD,"ab\\?\\?/cd\\?\\?=ef")!=0;}\n')
+            subprocess.run(["gcc", "-std=c99", "-Wall", "-Werror", "-I", d, "-o", os.path.join(d, "t"), os.path.join(d, "t.c")], check=True)
+            self.assertEqual(subprocess.run([os.path.join(d, "t")]).returncode, 0)
+
+
 class Cli(unittest.TestCase):
     def run_cli(self, env, out):
         return subprocess.run([sys.executable, SCRIPT, env, out], capture_output=True, text=True)
@@ -99,6 +111,49 @@ class Cli(unittest.TestCase):
             os.utime(out, (1000, 1000))
             self.assertEqual(self.run_cli(env, out).returncode, 0)
             self.assertEqual(os.stat(out).st_mtime, 1000)
+
+    def test_mode_0600(self):
+        with tempfile.TemporaryDirectory() as d:
+            env, out = os.path.join(d, ".env"), os.path.join(d, "w.h")
+            write(env, GOOD)
+            self.run_cli(env, out)
+            self.assertEqual(os.stat(out).st_mode & 0o777, 0o600)
+            os.chmod(out, 0o644)
+            self.run_cli(env, out)  # unchanged-content path
+            self.assertEqual(os.stat(out).st_mode & 0o777, 0o600)
+            self.assertEqual([f for f in os.listdir(d) if f.startswith(".wifi")], [])
+
+    def test_invalid_utf8(self):
+        with tempfile.TemporaryDirectory() as d:
+            env, out = os.path.join(d, ".env"), os.path.join(d, "w.h")
+            with open(env, "wb") as f:
+                f.write(b"WIFI_SSID=\xff\xfe\n")
+            r = self.run_cli(env, out)
+            self.assertEqual(r.returncode, 1)
+            self.assertTrue(r.stderr.startswith("error:"))
+            self.assertNotIn("Traceback", r.stderr)
+            self.assertFalse(os.path.exists(out))
+
+    def test_unwritable_output(self):
+        with tempfile.TemporaryDirectory() as d:
+            env = os.path.join(d, ".env")
+            write(env, GOOD)
+            r = self.run_cli(env, os.path.join(d, "no", "such", "w.h"))
+            self.assertEqual(r.returncode, 1)
+            self.assertTrue(r.stderr.startswith("error:"))
+            self.assertNotIn("Traceback", r.stderr)
+            self.assertNotIn("password1", r.stderr)
+
+    def test_lone_cr_not_a_separator(self):
+        self.assertEqual(g.parse_env("A=1\rB=2\n"), {"A": "1\rB=2"})
+
+    def test_leak_distinctive(self):
+        with tempfile.TemporaryDirectory() as d:
+            env, out = os.path.join(d, ".env"), os.path.join(d, "w.h")
+            write(env, "WIFI_SSID=Net\nWIFI_PASSWORD=Zq9xyz\nARM_KEY=bad key!Zq9xyz\n")
+            r = self.run_cli(env, out)
+            self.assertEqual(r.returncode, 1)
+            self.assertNotIn("Zq9xyz", r.stdout + r.stderr)
 
     def test_invalid(self):
         with tempfile.TemporaryDirectory() as d:

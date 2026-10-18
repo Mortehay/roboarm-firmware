@@ -7,11 +7,14 @@ Error messages name keys only, never values.
 import os
 import re
 import sys
+import tempfile
 
 
 def parse_env(text):
     env = {}
-    for line in text.splitlines():
+    for line in text.split("\n"):
+        if line.endswith("\r"):
+            line = line[:-1]
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -51,7 +54,7 @@ def _c_string(s):
     out = []
     for b in s.encode("utf-8"):
         c = chr(b)
-        if c == "\\" or c == '"':
+        if c in ('\\', '"', "?"):  # "?" escaped to defeat trigraphs
             out.append("\\" + c)
         elif 0x20 <= b <= 0x7E:
             out.append(c)
@@ -78,6 +81,9 @@ def main(argv):
     try:
         with open(env_path, encoding="utf-8") as f:
             env = parse_env(f.read())
+    except UnicodeDecodeError:
+        print("error: %s is not valid UTF-8" % env_path, file=sys.stderr)
+        return 1
     except OSError as e:
         print("error: cannot read %s: %s" % (env_path, e.strerror), file=sys.stderr)
         return 1
@@ -89,14 +95,30 @@ def main(argv):
         return 1
     content = render_header(env["WIFI_SSID"], env["WIFI_PASSWORD"], env["ARM_KEY"])
     try:
-        with open(out_path, encoding="utf-8") as f:
-            if f.read() == content:
-                return 0
-    except OSError:
-        pass
-    fd = os.open(out_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write(content)
+        try:
+            with open(out_path, encoding="utf-8") as f:
+                same = f.read() == content
+        except (OSError, UnicodeDecodeError):
+            same = False
+        if same:
+            os.chmod(out_path, 0o600)
+            return 0
+        d = os.path.dirname(os.path.abspath(out_path))
+        fd, tmp = tempfile.mkstemp(dir=d, prefix=".wifi_secrets.")
+        try:
+            os.fchmod(fd, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(content)
+            os.replace(tmp, out_path)
+        except BaseException:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+            raise
+    except OSError as e:
+        print("error: cannot write %s: %s" % (out_path, e.strerror), file=sys.stderr)
+        return 1
     return 0
 
 

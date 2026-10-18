@@ -5,3 +5,4 @@ build/
 .lh/
 .env
 .mcp.json
+roboarm/src/boards/wifi_secrets.h
