@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "Config.h"
 
-enum class CmdType : uint8_t { Move, All, Speed, Home, Stop, Release, Query };
+enum class CmdType : uint8_t { Move, All, Speed, Home, Stop, Release, Query, Info };
 
 struct Command {
   CmdType type;

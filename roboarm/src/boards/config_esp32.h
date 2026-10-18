@@ -12,4 +12,6 @@ const ArmConfig kConfig = {
     {4, 3, 2, 1, 0},  // homeOrder: base, shoulder, elbow, wrist, claw
     60.0f,            // defaultSpeed deg/s
     30.0f,            // homingSpeed deg/s
-    300};             // settleMs
+    300,              // settleMs
+    "esp32-d1r32",    // boardName
+    1};               // wiringVersion

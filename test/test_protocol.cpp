@@ -95,3 +95,8 @@ TEST(parse_spaces) {
   CHECK_EQ(P("M 2 -5", c), ParseError::None);
   CHECK_EQ(c.values[0], -5);
 }
+TEST(parse_info) {
+  Command c{};
+  CHECK_EQ(P("I", c), ParseError::None); CHECK_EQ(c.type, CmdType::Info);
+  CHECK_EQ(P("I x", c), ParseError::BadCommand);
+}

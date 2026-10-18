@@ -45,6 +45,7 @@ ParseError parseCommand(const char* line, Command& out) {
     case 'S': out.type = CmdType::Stop; return atEnd(p) ? ParseError::None : ParseError::BadCommand;
     case 'R': out.type = CmdType::Release; return atEnd(p) ? ParseError::None : ParseError::BadCommand;
     case '?': out.type = CmdType::Query; return atEnd(p) ? ParseError::None : ParseError::BadCommand;
+    case 'I': out.type = CmdType::Info; return atEnd(p) ? ParseError::None : ParseError::BadCommand;
     case 'V': {
       out.type = CmdType::Speed;
       if (!parseInt16(p, out.values[0]) || !atEnd(p)) return ParseError::BadCommand;

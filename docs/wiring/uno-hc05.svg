@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="940" height="960" viewBox="0 0 940 960" font-family="Arial, Helvetica, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="1010" viewBox="0 0 940 1010" font-family="Arial, Helvetica, sans-serif" font-size="12">
 <title>Arduino Uno + HC-05 — servo wiring</title>
-<rect x="0" y="0" width="940" height="960" fill="#ffffff"/>
+<rect x="0" y="0" width="940" height="1010" fill="#ffffff"/>
 <text x="470" y="26" text-anchor="middle" font-size="18" font-weight="bold" fill="#111">Arduino Uno + HC-05 — servo wiring</text>
 <rect x="30" y="40" width="300" height="70" rx="6" fill="#eef3fb" stroke="#223" stroke-width="2"/>
 <text x="180" y="58" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">Bench PSU Wanptek GA305H (0–30 V / 5 A)</text>
@@ -168,4 +168,6 @@
 <line x1="560" y1="876" x2="590" y2="876" stroke="#111" stroke-width="3" stroke-linecap="round"/>
 <text x="596" y="880" text-anchor="start" font-size="11" fill="#111" font-weight="bold">COMMON GROUND: PSU − ↔ Uno GND (required)</text>
 <text x="30" y="910" text-anchor="start" font-size="11" fill="#111">Servo signal pins: Uno 5 V logic. Servos are powered by the PSU rail only, never from the Uno's 5V pin.</text>
+<rect x="30" y="968" width="880" height="34" fill="#ffffff" stroke="#223" stroke-width="2"/>
+<text x="470" y="990" text-anchor="middle" font-size="13" font-weight="bold" fill="#111">Wiring v1 · uno · Stage 1 · 2026-10-18 · firmware config: config_uno.h</text>
 </svg>

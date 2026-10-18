@@ -18,6 +18,12 @@ Arduino Uno + HC-05 Bluetooth module (alternative). The HC-05 must be configured
 
 Review the diagram for your board against your physical wiring before powering anything.
 
+## Wiring versions
+
+Every diagram has a title block (`Wiring v<N> · <board> · ...`). Any change to pins, resistors, the capacitor or the power layout bumps `<N>`, updates the title block, `wiringVersion` in the board's `config_*.h`, and [CHANGELOG.md](CHANGELOG.md). The firmware reports its version on boot and on the `I` command: `INFO RoboArm fw=... proto=... board=... wiring=<N>`.
+
+**Before powering on, check that the wiring version shown by the app (or by `I` in the monitor) matches the title block of your diagram.** If they differ, stop and find out why.
+
 ## Parts and limits
 
 | Item | Value |

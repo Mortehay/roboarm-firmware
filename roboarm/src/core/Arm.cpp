@@ -1,6 +1,7 @@
 #include "Arm.h"
 #include <stdio.h>
 #include "Protocol.h"
+#include "Version.h"
 
 namespace {
 int16_t roundDeg(float x) {
@@ -142,6 +143,14 @@ void Arm::handleLine(const char* line, ReplySink& reply) {
       motion_.setSpeed(userSpeed_);
       state_ = ArmState::Detached;
       reply.line("OK R");
+      break;
+    }
+    case CmdType::Info: {
+      char info[80];
+      snprintf(info, sizeof info, "INFO RoboArm fw=%s proto=%u board=%s wiring=%u",
+               kFirmwareVersion, static_cast<unsigned>(kProtocolVersion),
+               cfg_.boardName, static_cast<unsigned>(cfg_.wiringVersion));
+      reply.line(info);
       break;
     }
     case CmdType::Query: {

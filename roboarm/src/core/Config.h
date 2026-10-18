@@ -13,4 +13,6 @@ struct ArmConfig {
   uint8_t homeOrder[kJointCount];  // joint indices
   float defaultSpeed, homingSpeed;
   uint16_t settleMs;
+  const char* boardName;   // reported by the I command
+  uint8_t wiringVersion;   // matches the docs/wiring title block
 };

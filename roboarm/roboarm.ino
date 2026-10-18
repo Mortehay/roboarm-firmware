@@ -63,9 +63,11 @@ static void pump(Stream& in, LineReader& reader, StreamReply& reply) {
 void setup() {
   Serial.begin(115200);
   serialReply.line("READY RoboArm");
+  arm.handleLine("I", serialReply);
 #if defined(ESP32)
   SerialBT.begin("RoboArm");
   btReply.line("READY RoboArm");
+  arm.handleLine("I", btReply);
 #endif
 }
 

@@ -30,6 +30,7 @@ ArmConfig makeCfg() {
   const uint8_t order[kJointCount] = {4, 3, 2, 1, 0};
   for (int i = 0; i < kJointCount; ++i) c.homeOrder[i] = order[i];
   c.defaultSpeed = 60; c.homingSpeed = 30; c.settleMs = 300;
+  c.boardName = "testboard"; c.wiringVersion = 7;
   return c;
 }
 std::string cmd(Arm& a, const char* l) {
@@ -235,4 +236,22 @@ TEST(round_negative_half_away) {
   c.joints[0].minDeg = -50; c.joints[0].maxDeg = 150; c.joints[0].homeDeg = -10;
   FakeServoOut o; Arm a(c, o);
   CHECK_CMD(a, "?", "STATE -10 90 90 90 90 0 60");
+}
+
+TEST(info_in_every_state) {
+  const char* want = "INFO RoboArm fw=0.2.0 proto=1 board=testboard wiring=7";
+  ArmConfig c = makeCfg(); FakeServoOut o; Arm a(c, o);
+  CHECK_CMD(a, "I", want);
+  CHECK_EQ(o.calls.size(), (size_t)0);
+  CHECK_CMD(a, "H", "OK H");  // Homing
+  CHECK(a.state() == ArmState::Homing);
+  size_t before = o.calls.size();
+  CHECK_CMD(a, "I", want);
+  CHECK_EQ(o.calls.size(), before);
+  arm(a);  // Armed
+  CHECK(a.state() == ArmState::Armed);
+  before = o.calls.size();
+  CHECK_CMD(a, "I", want);
+  CHECK_EQ(o.calls.size(), before);
+  CHECK(a.state() == ArmState::Armed);
 }
