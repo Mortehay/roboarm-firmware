@@ -7,6 +7,12 @@ Firmware for a 5-joint servo robot arm (Claw, Wrist, Elbow, Shoulder, Base) runn
 - Wiring: [docs/wiring/](docs/wiring/)
 - Flashing: [docs/flashing.md](docs/flashing.md)
 
+## Supported boards
+
+- ESP32 D1 R32 (Bluetooth): `make flash-esp32`
+- WeMos D1 (ESP8266, Wi-Fi): `make flash-esp8266` (needs `WIFI_SSID`, `WIFI_PASSWORD`, `ARM_KEY` in `.env`, see [docs/flashing.md](docs/flashing.md#esp8266-d1-wi-fi))
+- Arduino Uno + HC-05 (Bluetooth): `make flash-uno`
+
 ## Quick start
 
 Install Docker (your user in the `docker` group) and `make`. Nothing else is needed.

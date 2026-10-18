@@ -13,4 +13,4 @@ The wiring version `<N>` must equal `wiringVersion` in that board's config heade
 
 ## esp8266-d1
 
-- **v1** (2026-10-18, Stage 1): initial wiring. Servo signals on GPIO13, 12, 14, 4, 5. Min firmware 0.2.0. Diagram added in a later task.
+- **v1** (2026-10-18, Stage 1): initial wiring. Servo signals on GPIO13, 12, 14, 4, 5. Min firmware 0.2.0. Diagram: [esp8266-d1.svg](esp8266-d1.svg).

@@ -16,6 +16,10 @@ Arduino Uno + HC-05 Bluetooth module (alternative). The HC-05 must be configured
 
 ![Arduino Uno + HC-05 wiring](uno-hc05.svg)
 
+WeMos D1 (ESP8266, Wi-Fi), see [ESP8266 D1](#esp8266-d1-wi-fi):
+
+![WeMos D1 ESP8266 wiring](esp8266-d1.svg)
+
 Review the diagram for your board against your physical wiring before powering anything.
 
 ## Wiring versions
@@ -46,6 +50,20 @@ Every diagram has a title block (`Wiring v<N> · <board> · ...`). Any change to
 | J5 Base | MG996 | GPIO26 | D2 |
 
 Verify the GPIO / header-label pairing on **your board's silkscreen** before wiring. D1 R32 clones differ. If the silkscreen disagrees with this table, trust the GPIO number: the firmware uses GPIO numbers. Never use GPIO 0, 2, 12, 15, 34, 35, 36, 39 (boot-strapping or input-only pins).
+
+### ESP8266 D1 (Wi-Fi)
+
+WeMos D1 (ESP8266), Uno-shaped, 3.3 V logic. Same power rules as the ESP32: PSU + goes only to the servo rail, PSU − to the board GND, board on USB only. Use the shared [pre-power checklist](#pre-power-checklist-do-in-this-order) below, with this pin table in step 5.
+
+| Joint | Servo | GPIO | Expected D1 R2 label |
+| --- | --- | --- | --- |
+| J1 Claw | MG90 | GPIO13 | D7 |
+| J2 Wrist | MG90 | GPIO12 | D6 |
+| J3 Elbow | MG996 | GPIO14 | D5 |
+| J4 Shoulder | MG996 | GPIO4 | D4 |
+| J5 Base | MG996 | GPIO5 | D3 |
+
+Verify the GPIO / label pairing on **your board's silkscreen** before wiring; if it disagrees, trust the GPIO number. Never use D8/GPIO15, D9/GPIO2 or GPIO0 (boot pins), nor D0/D1 (USB serial). The board has no Bluetooth: control is over USB or Wi-Fi (see [flashing.md](../flashing.md#esp8266-d1-wi-fi)).
 
 ### Arduino Uno
 

@@ -52,6 +52,46 @@ After a reset the monitor shows `READY RoboArm` (115200 baud). Servos stay limp 
 
 Monitor commands: `M j d` (move joint j to d degrees), `A d1 d2 d3 d4 d5`, `V s` (speed deg/s), `H` (home), `S` (stop), `R` (release), `?` (status).
 
+## ESP8266 D1 (Wi-Fi)
+
+Wi-Fi credentials live in `.env` in the repo root (gitignored; never commit it). Add three keys:
+
+```
+WIFI_SSID=YourNetworkName
+WIFI_PASSWORD=your-wifi-password
+ARM_KEY=3f9a1c0b7d2e4a6c8b1d5e90
+```
+
+- `WIFI_SSID` / `WIFI_PASSWORD`: your router's 2.4 GHz network. The ESP8266 has no 5 GHz radio, so use your 2.4 GHz network, **not** the `_5G` one.
+- `ARM_KEY`: shared secret the control app must send to connect. 8 to 40 characters: letters, digits, `_` and `-`. Generate one with `openssl rand -hex 12`.
+
+The credentials are compiled into the firmware (a generated, gitignored header). Then, with the **servo PSU output OFF**:
+
+```
+make flash-esp8266 PORT=/dev/ttyUSB0
+make monitor PORT=/dev/ttyUSB0
+```
+
+The board has a CH340 USB chip (same brltty fix as above). The monitor shows `READY RoboArm`, then `INFO RoboArm fw=0.2.0 proto=1 board=esp8266-d1 wiring=1`, then `WIFI <ip>` once it joins the network.
+
+Quick network check from the laptop (same Wi-Fi):
+
+```
+printf 'ROBOARM?' | nc -u -w1 -b 255.255.255.255 3334
+```
+
+Expected reply: `ROBOARM RoboArm <ip> 3333`. Then connect and authenticate:
+
+```
+nc <ip> 3333
+K <your key>        (reply: READY RoboArm)
+?                   (reply: the STATE line)
+```
+
+Only one client at a time; a second gets `ERR busy`. A wrong key gets `ERR bad key`.
+
+If the Wi-Fi password or SSID is wrong or the router is off, the arm keeps retrying every 15 s and USB control still works meanwhile.
+
 ## Without Docker (LOCAL=1)
 
 To run natively, install the toolchain once:
@@ -67,5 +107,6 @@ It installs `arduino-cli` into `~/.local/bin` (if missing), the ESP32 and AVR co
 - **"Failed to connect to ESP32" / "Connecting........_____"**: hold the **BOOT** button on the board while the upload shows `Connecting...`, release once the upload starts. Also try a different USB cable (some are charge-only).
 - **"port busy" / "Resource busy"**: close the serial monitor, the control app, or anything else using the port, then retry.
 - **Port not listed**: check the cable, the brltty fix above, and `dmesg | tail`.
+- **"Failed to connect" on the ESP8266**: unplug the servo signal wires and retry, pressing the board's RESET button once as the upload starts. The boot-strapping GPIOs are not used, but connected servos can still load the lines. Also try another USB cable.
 - **Uno upload fails with sync errors**: the HC-05 is probably still connected to D0/D1. Unplug it.
 - **No `READY RoboArm` in the monitor**: press the board's reset button; confirm baud 115200. Over Bluetooth the line is only sent if a client was already connected, so send `?` instead.
