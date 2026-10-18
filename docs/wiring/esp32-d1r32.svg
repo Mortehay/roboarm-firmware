@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940" height="830" viewBox="0 0 940 830" font-family="Arial, Helvetica, sans-serif" font-size="12">
+<title>ESP32 D1 R32 — servo wiring</title>
+<rect x="0" y="0" width="940" height="0" fill="#ffffff"/>
+<text x="470" y="26" text-anchor="middle" font-size="18" font-weight="bold" fill="#111">ESP32 D1 R32 — servo wiring</text>
+<rect x="30" y="40" width="300" height="70" rx="6" fill="#eef3fb" stroke="#223" stroke-width="2"/>
+<text x="180" y="58" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">Bench PSU Wanptek GA305H (0–30 V / 5 A)</text>
+<text x="180" y="77" text-anchor="middle" font-size="13" fill="#111" font-weight="bold">SET: 5.5–6.0 V  ·  CURRENT LIMIT: 3 A</text>
+<text x="180" y="94" text-anchor="middle" font-size="10" fill="#111">first power-up at 5.5 V; never above 6.0 V</text>
+<text x="52" y="130" text-anchor="end" font-size="10" fill="#d00000" font-weight="bold">OUT +</text>
+<text x="192" y="130" text-anchor="end" font-size="10" fill="#111" font-weight="bold">OUT −</text>
+<line x1="60" y1="110" x2="60" y2="225" stroke="#d00000" stroke-width="5" stroke-linecap="round"/>
+<line x1="60" y1="225" x2="890" y2="225" stroke="#d00000" stroke-width="5" stroke-linecap="round"/>
+<line x1="200" y1="110" x2="200" y2="165" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<line x1="140" y1="165" x2="890" y2="165" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<line x1="200" y1="165" x2="890" y2="165" stroke="#111" stroke-width="5" stroke-linecap="round"/>
+<circle cx="60" cy="110" r="5" fill="#d00000"/>
+<circle cx="200" cy="110" r="5" fill="#111"/>
+<text x="885" y="157" text-anchor="end" font-size="11" fill="#111" font-weight="bold">− rail</text>
+<text x="805" y="217" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">+ rail</text>
+<line x1="370" y1="225" x2="370" y2="211" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<line x1="370" y1="165" x2="370" y2="197" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+<line x1="354" y1="211" x2="386" y2="211" stroke="#111" stroke-width="4" stroke-linecap="round"/>
+<path d="M354 197 Q370 190 386 197" fill="none" stroke="#111" stroke-width="4"/>
+<text x="392" y="199" text-anchor="start" font-size="14" fill="#111" font-weight="bold">−</text>
+<text x="392" y="217" text-anchor="start" font-size="14" fill="#d00000" font-weight="bold">+</text>
+<circle cx="370" cy="225" r="5" fill="#d00000"/>
+<circle cx="370" cy="165" r="5" fill="#111"/>
+<text x="360" y="120" text-anchor="start" font-size="11" fill="#111" font-weight="bold">Capacitor 470–1000 µF, rated ≥ 10 V (electrolytic), across the rails (drawn between the rails)</text>
+<text x="360" y="136" text-anchor="start" font-size="11" fill="#d00000">POLARITY: stripe / short leg (−) → − rail;  long leg (+) → + rail</text>
+<text x="360" y="152" text-anchor="start" font-size="11" fill="#111">Wrong way round = it can pop. Mount close to the servos.</text>
+<line x1="70" y1="290" x2="70" y2="225" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="70" cy="225" r="5" fill="#d00000"/>
+<line x1="140" y1="290" x2="140" y2="165" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="140" cy="165" r="5" fill="#111"/>
+<rect x="30" y="290" width="150" height="100" rx="6" fill="#f4f4f4" stroke="#333" stroke-width="2"/>
+<text x="70" y="307" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">red +</text>
+<text x="140" y="307" text-anchor="middle" font-size="11" fill="#5a3a1a" font-weight="bold">brown −</text>
+<text x="105" y="338" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">J1 Claw</text>
+<text x="105" y="356" text-anchor="middle" font-size="11" fill="#111">MG90</text>
+<text x="105" y="378" text-anchor="middle" font-size="11" fill="#f07800" font-weight="bold">orange = signal</text>
+<line x1="105" y1="390" x2="105" y2="550" stroke="#f07800" stroke-width="3" stroke-linecap="round"/>
+<text x="111" y="520" text-anchor="start" font-size="10" fill="#f07800">J1 signal</text>
+<line x1="245" y1="290" x2="245" y2="225" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="245" cy="225" r="5" fill="#d00000"/>
+<line x1="315" y1="290" x2="315" y2="165" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="315" cy="165" r="5" fill="#111"/>
+<rect x="205" y="290" width="150" height="100" rx="6" fill="#f4f4f4" stroke="#333" stroke-width="2"/>
+<text x="245" y="307" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">red +</text>
+<text x="315" y="307" text-anchor="middle" font-size="11" fill="#5a3a1a" font-weight="bold">brown −</text>
+<text x="280" y="338" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">J2 Wrist</text>
+<text x="280" y="356" text-anchor="middle" font-size="11" fill="#111">MG90</text>
+<text x="280" y="378" text-anchor="middle" font-size="11" fill="#f07800" font-weight="bold">orange = signal</text>
+<line x1="280" y1="390" x2="280" y2="550" stroke="#f07800" stroke-width="3" stroke-linecap="round"/>
+<text x="286" y="520" text-anchor="start" font-size="10" fill="#f07800">J2 signal</text>
+<line x1="420" y1="290" x2="420" y2="225" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="420" cy="225" r="5" fill="#d00000"/>
+<line x1="490" y1="290" x2="490" y2="165" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="490" cy="165" r="5" fill="#111"/>
+<rect x="380" y="290" width="150" height="100" rx="6" fill="#f4f4f4" stroke="#333" stroke-width="2"/>
+<text x="420" y="307" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">red +</text>
+<text x="490" y="307" text-anchor="middle" font-size="11" fill="#5a3a1a" font-weight="bold">brown −</text>
+<text x="455" y="338" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">J3 Elbow</text>
+<text x="455" y="356" text-anchor="middle" font-size="11" fill="#111">MG996</text>
+<text x="455" y="378" text-anchor="middle" font-size="11" fill="#f07800" font-weight="bold">orange = signal</text>
+<line x1="455" y1="390" x2="455" y2="550" stroke="#f07800" stroke-width="3" stroke-linecap="round"/>
+<text x="461" y="520" text-anchor="start" font-size="10" fill="#f07800">J3 signal</text>
+<line x1="595" y1="290" x2="595" y2="225" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="595" cy="225" r="5" fill="#d00000"/>
+<line x1="665" y1="290" x2="665" y2="165" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="665" cy="165" r="5" fill="#111"/>
+<rect x="555" y="290" width="150" height="100" rx="6" fill="#f4f4f4" stroke="#333" stroke-width="2"/>
+<text x="595" y="307" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">red +</text>
+<text x="665" y="307" text-anchor="middle" font-size="11" fill="#5a3a1a" font-weight="bold">brown −</text>
+<text x="630" y="338" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">J4 Shoulder</text>
+<text x="630" y="356" text-anchor="middle" font-size="11" fill="#111">MG996</text>
+<text x="630" y="378" text-anchor="middle" font-size="11" fill="#f07800" font-weight="bold">orange = signal</text>
+<line x1="630" y1="390" x2="630" y2="550" stroke="#f07800" stroke-width="3" stroke-linecap="round"/>
+<text x="636" y="520" text-anchor="start" font-size="10" fill="#f07800">J4 signal</text>
+<line x1="770" y1="290" x2="770" y2="225" stroke="#d00000" stroke-width="3" stroke-linecap="round"/>
+<circle cx="770" cy="225" r="5" fill="#d00000"/>
+<line x1="840" y1="290" x2="840" y2="165" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round"/>
+<circle cx="840" cy="165" r="5" fill="#111"/>
+<rect x="730" y="290" width="150" height="100" rx="6" fill="#f4f4f4" stroke="#333" stroke-width="2"/>
+<text x="770" y="307" text-anchor="middle" font-size="11" fill="#d00000" font-weight="bold">red +</text>
+<text x="840" y="307" text-anchor="middle" font-size="11" fill="#5a3a1a" font-weight="bold">brown −</text>
+<text x="805" y="338" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">J5 Base</text>
+<text x="805" y="356" text-anchor="middle" font-size="11" fill="#111">MG996</text>
+<text x="805" y="378" text-anchor="middle" font-size="11" fill="#f07800" font-weight="bold">orange = signal</text>
+<line x1="805" y1="390" x2="805" y2="550" stroke="#f07800" stroke-width="3" stroke-linecap="round"/>
+<text x="811" y="520" text-anchor="start" font-size="10" fill="#f07800">J5 signal</text>
+<rect x="30" y="550" width="860" height="110" rx="6" fill="#e6f4ea" stroke="#164" stroke-width="2"/>
+<text x="460" y="596" text-anchor="middle" font-size="14" fill="#111" font-weight="bold">ESP32 &quot;D1 R32&quot; (Uno form factor, 3.3 V logic)</text>
+<text x="460" y="614" text-anchor="middle" font-size="11" fill="#a00">Signal pins labelled GPIO / header label — verify on your board's silkscreen before wiring</text>
+<text x="460" y="632" text-anchor="middle" font-size="11" fill="#111">Pin labels above are for J1…J5, left to right. Never use GPIO 0, 2, 12, 15, 34, 35, 36, 39.</text>
+<text x="545" y="570" text-anchor="middle" font-size="12" fill="#a00" font-weight="bold">5V / VIN</text>
+<text x="875" y="645" text-anchor="end" font-size="12" fill="#111" font-weight="bold">GND</text>
+<circle cx="105" cy="550" r="5" fill="#f07800"/>
+<text x="105" y="570" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">GPIO13 / D9</text>
+<circle cx="280" cy="550" r="5" fill="#f07800"/>
+<text x="280" y="570" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">GPIO14 / D7</text>
+<circle cx="455" cy="550" r="5" fill="#f07800"/>
+<text x="455" y="570" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">GPIO27 / D6</text>
+<circle cx="630" cy="550" r="5" fill="#f07800"/>
+<text x="630" y="570" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">GPIO25 / D3</text>
+<circle cx="805" cy="550" r="5" fill="#f07800"/>
+<text x="805" y="570" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">GPIO26 / D2</text>
+<circle cx="545" cy="550" r="5" fill="#a00"/>
+<text x="545" y="542" text-anchor="middle" font-size="26" fill="#d00000" font-weight="bold">✗</text>
+<polyline points="890,165 915,165 915,645 890,645" fill="none" stroke="#ffd400" stroke-width="13" stroke-linejoin="round" stroke-linecap="round"/>
+<polyline points="890,165 915,165 915,645 890,645" fill="none" stroke="#111" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="890" cy="165" r="5" fill="#111"/>
+<circle cx="890" cy="645" r="5" fill="#111"/>
+<text x="926" y="400" transform="rotate(-90 926 400)" text-anchor="middle" font-size="11" font-weight="bold" fill="#111">COMMON GROUND to PSU −</text>
+<rect x="30" y="700" width="170" height="60" rx="6" fill="#fff" stroke="#333" stroke-width="2"/>
+<text x="115" y="725" text-anchor="middle" font-size="13" fill="#111" font-weight="bold">Laptop</text>
+<text x="115" y="743" text-anchor="middle" font-size="11" fill="#111">USB port</text>
+<line x1="115" y1="700" x2="115" y2="660" stroke="#555" stroke-width="4" stroke-linecap="round"/>
+<text x="125" y="684" text-anchor="start" font-size="11" fill="#111">USB: power + serial</text>
+<text x="270" y="700" text-anchor="start" font-size="12" fill="#111" font-weight="bold">Legend</text>
+<line x1="270" y1="715" x2="304" y2="715" stroke="#d00000" stroke-width="4" stroke-linecap="round"/>
+<text x="312" y="719" text-anchor="start" font-size="11" fill="#111">+ servo power (PSU + → red wires)</text>
+<line x1="270" y1="735" x2="304" y2="735" stroke="#5a3a1a" stroke-width="4" stroke-linecap="round"/>
+<text x="312" y="739" text-anchor="start" font-size="11" fill="#111">− servo power (brown wires, PSU −)</text>
+<line x1="270" y1="755" x2="304" y2="755" stroke="#f07800" stroke-width="4" stroke-linecap="round"/>
+<text x="312" y="759" text-anchor="start" font-size="11" fill="#111">signal (orange wires, board pin → servo)</text>
+<line x1="270" y1="775" x2="304" y2="775" stroke="#ffd400" stroke-width="10" stroke-linecap="round"/>
+<line x1="270" y1="775" x2="304" y2="775" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+<text x="312" y="779" text-anchor="start" font-size="11" fill="#111" font-weight="bold">COMMON GROUND (PSU − to GND)</text>
+<rect x="560" y="690" width="360" height="100" rx="6" fill="#fff0f0" stroke="#d00000" stroke-width="3"/>
+<text x="740" y="718" text-anchor="middle" font-size="14" fill="#d00000" font-weight="bold">✗ do NOT connect PSU + to 5V / VIN</text>
+<text x="740" y="738" text-anchor="middle" font-size="12" fill="#111">PSU + goes ONLY to the servo + rail.</text>
+<text x="740" y="756" text-anchor="middle" font-size="12" fill="#111">The board gets power from USB only.</text>
+<text x="740" y="774" text-anchor="middle" font-size="12" fill="#111">Only PSU − is shared with the board (GND).</text>
+</svg>
