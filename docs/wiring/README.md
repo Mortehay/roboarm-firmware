@@ -66,9 +66,9 @@ Verify the GPIO / header-label pairing on **your board's silkscreen** before wir
 
 A stock HC-05 is named `HC-05` and talks at 9600 baud in data mode. The firmware expects the name `RoboArm` at 115200 baud, so configure it once:
 
-1. Flash the Uno first, then disconnect the HC-05 from D0/D1. To pass AT commands through the Uno, upload a blank sketch (`File > Examples > 01.Basics > BareMinimum`) so the Uno does not drive D0/D1, and wire HC-05 TXD to Uno D0 and HC-05 RXD to Uno D1 through the 1 kΩ/2 kΩ divider (the same wiring as the diagram). Alternatively use a USB-serial adapter.
-2. Put the HC-05 in AT mode: hold the button on the module (or pull the EN/KEY pin high to 3.3 V) while powering it. The LED blinks slowly (about every 2 s). AT mode runs at **38400 baud**.
-3. Open a serial terminal at 38400 baud with line ending "Both NL & CR" and send:
+1. **Upload BareMinimum with the HC-05 disconnected** (`File > Examples > 01.Basics > BareMinimum` in the Arduino IDE). This leaves the Uno's chip idle so the USB-serial chip can talk straight through D0/D1.
+2. **Wire the HC-05 CROSSED, for AT setup ONLY.** This is different from the run-time diagram: with the chip idle, the USB-serial chip's TX drives D0 and its RX listens on D1. So: HC-05 RXD <- Uno D0 **through the 1 kΩ/2 kΩ divider** (the USB chip's TX is 5 V), HC-05 TXD -> Uno D1, VCC to Uno 5V, GND to Uno GND. Hold the button on the module (or hold the KEY/EN pin high) while powering it: the LED blinks slowly (about every 2 s) in AT mode.
+3. **Send the AT commands.** Open the Serial Monitor at **38400 baud**, line ending "Both NL & CR", and send:
    ```
    AT                      (reply OK)
    AT+NAME=RoboArm
@@ -76,13 +76,14 @@ A stock HC-05 is named `HC-05` and talks at 9600 baud in data mode. The firmware
    AT+ROLE=0
    ```
    Each should reply `OK`.
-4. Power-cycle the HC-05 without the button/EN so it returns to data mode, then flash the RoboArm firmware again. The module is now `RoboArm` at 115200 baud, and pairs with PIN 1234 (or 0000).
+4. **Unplug the HC-05** (power it down), then flash the RoboArm firmware: `make flash-uno PORT=/dev/ttyACM0`.
+5. **Rewire per the diagram** (run-time wiring): HC-05 TXD -> Uno D0, Uno D1 -> 1 kΩ -> HC-05 RXD with 2 kΩ from RXD to GND. Power it up normally (no button/KEY). The module is now `RoboArm` at 115200 baud, and pairs with PIN 1234 (or 0000).
 
 Module variants differ; check your HC-05's documentation if it does not answer.
 
 ## Pre-power checklist (do in this order)
 
-Tick each item. Do not skip ahead. (Step 7 needs the PSU output off; turn it on only in step 9.)
+Tick each item. Do not skip ahead. (Keep the PSU output off until step 9, including while you connect USB and open the monitor in step 7.)
 
 1. [ ] **PSU output is OFF** (output switch off, board unplugged from USB, nothing powered).
 2. [ ] **Set the PSU to 5.5 V and a 3 A current limit.** Never above 6.0 V. Do this with the output off and the leads disconnected; check the displayed values. Check your GA305H manual for how to view and set the current limit (some units only show or adjust it with the output shorted or via a dedicated button/knob). Do not strap PSU − to the GA305H earth/chassis terminal (it creates a ground loop with the laptop's USB ground).
@@ -92,7 +93,7 @@ Tick each item. Do not skip ahead. (Step 7 needs the PSU output off; turn it on 
 6. [ ] **No PSU wire to the board's 5V / VIN / 3V3.** Look at every board pin with a wire on it. Only the five signal wires and the one GND wire go to the board (plus the HC-05 wires on the Uno).
 7. [ ] **Board on USB only, firmware running.** Open the monitor (`make monitor PORT=/dev/ttyUSB0`); it shows `READY RoboArm` after a reset. (Over Bluetooth this line only appears if a client was already connected; send `?` to get a reply.) The servo rail is still off.
 8. [ ] **Position the arm by hand near the home pose** (all joints around the middle of their range). On `H` each servo jumps at full speed to home because the firmware does not know where it currently is.
-9. [ ] **PSU output ON** (connect USB and open the monitor only while the PSU output is off, see troubleshooting). Servos stay limp and do not move; nothing should twitch or heat up. If anything does, output OFF immediately and re-check steps 3 to 5.
+9. [ ] **PSU output ON** (USB and the monitor are already connected from step 7). Servos stay limp and do not move; nothing should twitch or heat up. If anything does, output OFF immediately and re-check steps 3 to 6.
 10. [ ] **Press Home** (`H`). Joints attach one at a time: base, shoulder, elbow, wrist, claw, 300 ms apart. Keep a hand near the PSU output switch. (On the Uno an attaching servo may twitch briefly toward mid-position before moving to home.)
 11. [ ] **Verify motion, then raise the limit.** Only after the arm has moved smoothly through all joints, raise the current limit toward 5 A if you need it. Keep the voltage at or below 6.0 V.
 
