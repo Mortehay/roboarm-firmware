@@ -107,6 +107,6 @@ It installs `arduino-cli` into `~/.local/bin` (if missing), the ESP32 and AVR co
 - **"Failed to connect to ESP32" / "Connecting........_____"**: hold the **BOOT** button on the board while the upload shows `Connecting...`, release once the upload starts. Also try a different USB cable (some are charge-only).
 - **"port busy" / "Resource busy"**: close the serial monitor, the control app, or anything else using the port, then retry.
 - **Port not listed**: check the cable, the brltty fix above, and `dmesg | tail`.
-- **"Failed to connect" on the ESP8266**: unplug the servo signal wires and retry, pressing the board's RESET button once as the upload starts. The boot-strapping GPIOs are not used, but connected servos can still load the lines. Also try another USB cable.
+- **"Failed to connect" on the ESP8266**: unplug the servo signal wires and retry. The D1 normally resets itself into upload mode; the RESET button is only a fallback. The boot-strapping GPIOs are not used, but connected servos can still load the lines. Also try another USB cable.
 - **Uno upload fails with sync errors**: the HC-05 is probably still connected to D0/D1. Unplug it.
 - **No `READY RoboArm` in the monitor**: press the board's reset button; confirm baud 115200. Over Bluetooth the line is only sent if a client was already connected, so send `?` instead.

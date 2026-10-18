@@ -63,7 +63,7 @@ WeMos D1 (ESP8266), Uno-shaped, 3.3 V logic. Same power rules as the ESP32: PSU 
 | J4 Shoulder | MG996 | GPIO4 | D4 |
 | J5 Base | MG996 | GPIO5 | D3 |
 
-Verify the GPIO / label pairing on **your board's silkscreen** before wiring; if it disagrees, trust the GPIO number. Never use D8/GPIO15, D9/GPIO2 or GPIO0 (boot pins), nor D0/D1 (USB serial). The board has no Bluetooth: control is over USB or Wi-Fi (see [flashing.md](../flashing.md#esp8266-d1-wi-fi)).
+Verify the GPIO / label pairing on **your board's silkscreen** before wiring; if it disagrees, trust the GPIO number. Never use D8/GPIO0, D9/GPIO2, D10/GPIO15 (boot pins), D2/GPIO16, or D0/D1 (USB serial). The five signal GPIOs also appear on a second header position (D11=GPIO13, D12=GPIO12, D13=GPIO14, D14/SDA=GPIO4, D15/SCL=GPIO5): these are the same nets, not free pins. The board has no Bluetooth: control is over USB or Wi-Fi (see [flashing.md](../flashing.md#esp8266-d1-wi-fi)).
 
 ### Arduino Uno
 
