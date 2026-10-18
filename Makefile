@@ -1,3 +1,4 @@
+export PATH := $(HOME)/.local/bin:$(PATH)
 PORT ?= /dev/ttyUSB0
 CLI  ?= arduino-cli
 ESP32_FQBN := esp32:esp32:esp32
