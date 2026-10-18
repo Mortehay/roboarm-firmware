@@ -18,7 +18,7 @@ Unplug the board, then:
 ls /dev/ttyUSB* /dev/ttyACM*
 ```
 
-Plug the board in and run the same command again. The new entry is your port (usually `/dev/ttyUSB0` for ESP32 D1 R32 with a CH340 chip, `/dev/ttyACM0` for an Uno). `dmesg | tail` shows which device name the kernel assigned.
+Plug the board in and run the same command again. The new entry is your port (usually `/dev/ttyUSB0` for ESP32 D1 R32 with a CH340 chip, `/dev/ttyACM0` for a genuine Uno; Uno clones with a CH340 chip show up as `/dev/ttyUSB0`). `dmesg | tail` shows which device name the kernel assigned.
 
 If you get "Permission denied" opening the port, add yourself to the serial group (`sudo usermod -aG dialout $USER`, then log out and in).
 

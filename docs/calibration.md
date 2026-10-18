@@ -1,6 +1,6 @@
 # Calibration (owner procedure)
 
-Goal: find a safe **min**, **max** and **home** for each joint and enter them in `roboarm/src/boards/config_esp32.h` (and the Uno config if used). Initial values are min 30, max 150, home 90 for every joint, which are guesses.
+Goal: find a safe **min**, **max** and **home** for each joint and enter them in `roboarm/src/boards/config_esp32.h` (or `roboarm/src/boards/config_uno.h` if you use the Uno; use `/dev/ttyACM0` instead of `/dev/ttyUSB0` for the commands below, and unplug the HC-05 TXD wire for USB work). Initial values are min 30, max 150, home 90 for every joint, which are guesses.
 
 **Degrees here are command values, not true horn angles.** The servo library maps 0 to 180 onto 500 to 2400 µs pulses, and real servos differ. Record the numbers you send, not what a protractor shows. Calibration measures where the arm physically stops being happy, in those command units.
 
@@ -26,6 +26,8 @@ For each joint (J1 to J5), one at a time:
 3. **Stop at the first sign of strain**: servo buzzing or humming, the arm touching a stop, a cable pulling, a rising PSU current. Back off 5°. That value is the joint's **min**. Record it.
 4. Return to the middle and repeat toward the high extreme to find **max**.
 5. Choose **home** near the arm's natural resting pose, safely inside min and max. Keep the arm balanced so gravity does not load the weak joints.
+
+**The firmware clamps to the current min/max (30 and 150 initially).** Jogging cannot go beyond them, and you will see `WARN j clamped to d`. Either accept 30 to 150 as the outer bound for that joint, or, if the joint can clearly travel further, temporarily widen that joint's min/max in the config (for example 10 and 170), reflash, then continue carefully in 5° steps with the PSU on the 3 A limit. Set the final values afterwards.
 
 Notes:
 - The limits are firmware clamps. Leave a little margin (a few degrees) from the true mechanical stop.
