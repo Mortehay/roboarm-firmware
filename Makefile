@@ -7,9 +7,12 @@ LOCAL ?=
 IMAGE ?= roboarm-firmware-tools
 ESP32_FQBN := esp32:esp32:esp32
 UNO_FQBN   := arduino:avr:uno
+ESP8266_FQBN := esp8266:esp8266:d1
+WIFI_SECRETS := roboarm/src/boards/wifi_secrets.h
+GEN_SECRETS  = python3 scripts/gen_wifi_secrets.py .env $(WIFI_SECRETS)
 CORE_SRCS  := $(wildcard roboarm/src/core/*.cpp)
 
-.PHONY: test build-esp32 build-uno flash-esp32 flash-uno monitor image
+.PHONY: test build-esp32 build-uno build-esp8266 flash-esp32 flash-uno flash-esp8266 monitor image
 
 image:
 	docker build -t $(IMAGE) .
@@ -20,6 +23,7 @@ test:
 	@mkdir -p build
 	g++ -std=c++17 -Wall -Wextra -Werror -Iroboarm/src $(CORE_SRCS) $(wildcard test/*.cpp) -o build/tests
 	./build/tests
+	python3 -m unittest discover -s test/py
 
 build-esp32:
 	$(CLI) compile --fqbn $(ESP32_FQBN) roboarm
@@ -27,11 +31,18 @@ build-esp32:
 build-uno:
 	$(CLI) compile --fqbn $(UNO_FQBN) roboarm
 
+build-esp8266:
+	$(GEN_SECRETS)
+	$(CLI) compile --fqbn $(ESP8266_FQBN) roboarm
+
 flash-esp32: build-esp32
 	$(CLI) upload -p $(PORT) --fqbn $(ESP32_FQBN) roboarm
 
 flash-uno: build-uno
 	$(CLI) upload -p $(PORT) --fqbn $(UNO_FQBN) roboarm
+
+flash-esp8266: build-esp8266
+	$(CLI) upload -p $(PORT) --fqbn $(ESP8266_FQBN) roboarm
 
 monitor:
 	$(CLI) monitor -p $(PORT) -c baudrate=115200
@@ -52,10 +63,10 @@ DEVICE_ARGS = --device "$(PORT)" --group-add $$(stat -c %g "$(PORT)")
 
 .PHONY: ensure-image
 
-test build-esp32 build-uno: ensure-image
+test build-esp32 build-uno build-esp8266: ensure-image
 	$(DOCKER_RUN) $(IMAGE) make $@ LOCAL=1
 
-flash-esp32 flash-uno monitor: ensure-image
+flash-esp32 flash-uno flash-esp8266 monitor: ensure-image
 	@$(CHECK_PORT)
 	$(DOCKER_RUN) $(DEVICE_ARGS) $(IMAGE) make $@ LOCAL=1 PORT=$(PORT)
 

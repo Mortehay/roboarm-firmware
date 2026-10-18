@@ -5,3 +5,5 @@
 .mcp.json
 .superpowers/
 build/
+roboarm/src/boards/wifi_secrets.h
+__pycache__/

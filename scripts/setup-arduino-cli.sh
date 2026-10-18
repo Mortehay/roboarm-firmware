@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Idempotent toolchain setup: arduino-cli, ESP32 + AVR cores, libraries.
+# Idempotent toolchain setup: arduino-cli, ESP32 + ESP8266 + AVR cores, libraries.
 set -euo pipefail
 
-URL="https://espressif.github.io/arduino-esp32/package_esp32_index.json"
+URL="https://espressif.github.io/arduino-esp32/package_esp32_index.json,https://arduino.esp8266.com/stable/package_esp8266com_index.json"
 export PATH="$HOME/.local/bin:$PATH"
 
 if ! command -v arduino-cli >/dev/null 2>&1; then
@@ -13,7 +13,7 @@ fi
 
 arduino-cli version
 arduino-cli core update-index --additional-urls "$URL"
-arduino-cli core install esp32:esp32 arduino:avr --additional-urls "$URL"
+arduino-cli core install esp32:esp32 arduino:avr esp8266:esp8266@3.1.2 --additional-urls "$URL"
 arduino-cli lib install ESP32Servo Servo
 
 echo "--- cores ---"
