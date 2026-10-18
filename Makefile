@@ -13,10 +13,10 @@ test:
 	./build/tests
 
 build-esp32:
-	$(CLI) compile --fqbn $(ESP32_FQBN) roboarm
+	$(CLI) compile --fqbn $(ESP32_FQBN) --build-property "compiler.cpp.extra_flags=-I$(CURDIR)/roboarm/src" roboarm
 
 build-uno:
-	$(CLI) compile --fqbn $(UNO_FQBN) roboarm
+	$(CLI) compile --fqbn $(UNO_FQBN) --build-property "compiler.cpp.extra_flags=-I$(CURDIR)/roboarm/src" roboarm
 
 flash-esp32: build-esp32
 	$(CLI) upload -p $(PORT) --fqbn $(ESP32_FQBN) roboarm
