@@ -19,7 +19,7 @@ Goal: find a safe **min**, **max** and **home** for each joint and enter them in
 
 ## Step 2: find the limits of each joint
 
-For each joint (J1 to J5), one at a time:
+For each joint (J1 to J5 on ESP8266; J1 to J6 on ESP32 and Uno, where J6 is wrist1, between wrist0 and the elbow), one at a time:
 
 1. Send `H`, then jog with the control app or via the monitor with `M j d`.
 2. Move in **5° steps** toward the low extreme, e.g. `M 1 85`, `M 1 80`, ... Pause after each step.
@@ -33,20 +33,22 @@ Notes:
 - The limits are firmware clamps. Leave a little margin (a few degrees) from the true mechanical stop.
 - The firmware clamps commands to min..max and replies `WARN j clamped to d`.
 - Calibrate the heavy joints (J3 to J5, MG996) with the arm supported so it cannot fall when released.
+- J6 (wrist1, MG90) is not locked: `H` and `M 6` work from the first power-up with the placeholder 30/150/90. Its first move stays inside 30 to 150 until you have calibrated it.
 
 ## Record the results
 
 | Joint | Name | Servo | min | max | home |
 | --- | --- | --- | --- | --- | --- |
 | J1 | Claw | MG90 | | | |
-| J2 | Wrist | MG90 | | | |
+| J2 | Wrist0 | MG90 | | | |
+| J6 | Wrist1 | MG90 | | | |
 | J3 | Elbow | MG996 | | | |
 | J4 | Shoulder | MG996 | | | |
 | J5 | Base | MG996 | | | |
 
 ## Step 3: enter the values
 
-Edit `roboarm/src/boards/config_esp32.h`. Each joint line is `{pin, min, max, home}`:
+Edit `roboarm/src/boards/config_esp32.h` (or `config_uno.h`). Each joint line is `{pin, min, max, home}`; joint 6 is the sixth line (GPIO 17 / D4 on ESP32, D11 on Uno):
 
 ```
 {13, 30, 150, 90},   // J1 Claw  -> {13, <min>, <max>, <home>}
@@ -61,7 +63,7 @@ make test && make build-esp32
 make flash-esp32 PORT=/dev/ttyUSB0
 ```
 
-Hand-position the arm near the new home pose, PSU on, then send `H`. Confirm the arm attaches one joint at a time (base, shoulder, elbow, wrist, claw) and settles at the new home. Then check each joint moves smoothly to its new min and max with `M j d`.
+Hand-position the arm near the new home pose, PSU on, then send `H`. Confirm the arm attaches one joint at a time (base, shoulder, elbow, wrist1, wrist0, claw on ESP32 and Uno) and settles at the new home. Also run `I` and confirm `joints=6` and `wiring=2` before the PSU is turned on. Then check each joint moves smoothly to its new min and max with `M j d`.
 
 ## Step 5: commit and sync the app
 

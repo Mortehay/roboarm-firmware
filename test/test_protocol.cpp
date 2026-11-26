@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "core/LineReader.h"
 #include "core/Protocol.h"
@@ -58,9 +59,25 @@ TEST(parse_move) {
 }
 TEST(parse_all) {
   Command c{};
-  CHECK_EQ(P("A 10 20 30 40 50", c), ParseError::None);
+  char line[128] = "A";
+  for (int i = 1; i <= kJointCount; i++) snprintf(line + strlen(line), sizeof line - strlen(line), " %d", i * 10);
+  CHECK_EQ(P(line, c), ParseError::None);
   CHECK_EQ(c.type, CmdType::All);
-  for (int i = 0; i < 5; i++) CHECK_EQ(c.values[i], (i + 1) * 10);
+  for (int i = 0; i < kJointCount; i++) CHECK_EQ(c.values[i], (i + 1) * 10);
+}
+TEST(parse_all_needs_exact_count) {
+  Command c{};
+  char line[128];
+  // one value too few
+  strcpy(line, "A");
+  for (int i = 0; i < kJointCount - 1; i++) strcat(line, " 90");
+  CHECK_EQ(P(line, c), ParseError::BadCommand);
+  // exactly kJointCount values
+  strcat(line, " 90");
+  CHECK_EQ(P(line, c), ParseError::None);
+  // one value too many
+  strcat(line, " 90");
+  CHECK_EQ(P(line, c), ParseError::BadCommand);
 }
 TEST(parse_simple) {
   Command c{};
@@ -75,12 +92,14 @@ TEST(parse_simple) {
 TEST(parse_bad_joint) {
   Command c{};
   CHECK_EQ(P("M 0 90", c), ParseError::BadJoint);
-  CHECK_EQ(P("M 6 90", c), ParseError::BadJoint);
+  char line[32];
+  snprintf(line, sizeof line, "M %d 90", kJointCount + 1);
+  CHECK_EQ(P(line, c), ParseError::BadJoint);
 }
 TEST(parse_garbage) {
   Command c{};
   const char* bad[] = {"", "X", "M", "M 3", "M 3 abc", "A 1 2 3", "M 3 90 extra",
-                       "V", "H x", "M 3 99999", "M 3 -99999", "A 1 2 3 4 5 6", "M 3x 90"};
+                       "V", "H x", "M 3 99999", "M 3 -99999", "M 3x 90"};
   for (const char* s : bad) {
     if (P(s, c) != ParseError::BadCommand) check::fail(__FILE__, __LINE__, s);
   }
