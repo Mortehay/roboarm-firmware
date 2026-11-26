@@ -60,7 +60,7 @@ void Arm::startHome() {
 }
 
 void Arm::handleLine(const char* line, ReplySink& reply) {
-  char buf[48];
+  char buf[96];
   Command cmd;
   ParseError err = parseCommand(line, cmd);
   if (err == ParseError::BadJoint) { reply.line("ERR bad joint"); return; }
@@ -93,7 +93,8 @@ void Arm::handleLine(const char* line, ReplySink& reply) {
         }
         motion_.setTarget(i, d[i]);
       }
-      snprintf(buf, sizeof buf, "OK A %d %d %d %d %d", d[0], d[1], d[2], d[3], d[4]);
+      int n = snprintf(buf, sizeof buf, "OK A");
+      for (uint8_t i = 0; i < kJointCount; ++i) n += snprintf(buf + n, sizeof buf - n, " %d", d[i]);
       reply.line(buf);
       break;
     }
@@ -146,18 +147,19 @@ void Arm::handleLine(const char* line, ReplySink& reply) {
       break;
     }
     case CmdType::Info: {
-      char info[80];
-      snprintf(info, sizeof info, "INFO RoboArm fw=%s proto=%u board=%s wiring=%u",
+      char info[96];
+      snprintf(info, sizeof info, "INFO RoboArm fw=%s proto=%u board=%s wiring=%u joints=%u",
                kFirmwareVersion, static_cast<unsigned>(kProtocolVersion),
-               cfg_.boardName, static_cast<unsigned>(cfg_.wiringVersion));
+               cfg_.boardName, static_cast<unsigned>(cfg_.wiringVersion),
+               static_cast<unsigned>(kJointCount));
       reply.line(info);
       break;
     }
     case CmdType::Query: {
-      snprintf(buf, sizeof buf, "STATE %d %d %d %d %d %d %d",
-               roundDeg(motion_.position(0)), roundDeg(motion_.position(1)),
-               roundDeg(motion_.position(2)), roundDeg(motion_.position(3)),
-               roundDeg(motion_.position(4)),
+      int n = snprintf(buf, sizeof buf, "STATE");
+      for (uint8_t i = 0; i < kJointCount; ++i)
+        n += snprintf(buf + n, sizeof buf - n, " %d", roundDeg(motion_.position(i)));
+      snprintf(buf + n, sizeof buf - n, " %d %d",
                state_ == ArmState::Armed ? 1 : 0, static_cast<int>(userSpeed_ + 0.5f));
       reply.line(buf);
       break;

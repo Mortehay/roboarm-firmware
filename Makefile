@@ -25,6 +25,12 @@ test:
 	@mkdir -p build
 	g++ -std=c++17 -Wall -Wextra -Werror -Iroboarm/src $(CORE_SRCS) $(wildcard test/*.cpp) -o build/tests
 	./build/tests
+	g++ -std=c++17 -Wall -Wextra -Werror -DROBOARM_JOINT_COUNT=5 -Iroboarm/src $(CORE_SRCS) $(wildcard test/*.cpp) -o build/tests5
+	./build/tests5
+	@for b in ESP32 UNO ESP8266; do \
+	  extra=""; [ "$$b" = ESP8266 ] && extra="-DESP8266"; \
+	  g++ -std=c++17 -Wall -Wextra -Werror $$extra -DBOARD_$$b -Iroboarm/src -Itest $(CORE_SRCS) test/main.cpp test/boards/check_boards.cpp -o build/boards_$$b && ./build/boards_$$b || exit 1; \
+	done
 	python3 -m unittest discover -s test/py
 
 build-esp32:
